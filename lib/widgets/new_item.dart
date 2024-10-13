@@ -18,10 +18,14 @@ class _NewItemState extends State<NewItem> {
   var _enteredName = '';
   var _enteredQuantity = 1;
   var _selectedCategory = categories[Categories.vegetables]!;
+  var _isSending = false;
 
   void _saveItem() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
+      setState(() {
+        _isSending = true;
+      });
       final url = Uri.https(
           'orderice-19a30-default-rtdb.asia-southeast1.firebasedatabase.app',
           'shopping_list.json');
@@ -139,12 +143,20 @@ class _NewItemState extends State<NewItem> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       TextButton(
-                          onPressed: () {
-                            _formKey.currentState!.reset();
-                          },
+                          onPressed: _isSending
+                              ? null
+                              : () {
+                                  _formKey.currentState!.reset();
+                                },
                           child: const Text('Reset')),
                       ElevatedButton(
-                          onPressed: _saveItem, child: const Text('Add item'))
+                          onPressed: _isSending ? null : _saveItem,
+                          child: _isSending
+                              ? const SizedBox(
+                                  height: 16,
+                                  width: 16,
+                                  child: CircularProgressIndicator())
+                              : const Text('Add item'))
                     ],
                   )
                 ],
