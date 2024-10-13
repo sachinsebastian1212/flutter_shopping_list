@@ -16,6 +16,7 @@ class GroceryList extends StatefulWidget {
 class _GroceryListState extends State<GroceryList> {
   List<GroceryItem> _groceryItems = [];
   bool _isloading = true;
+  String? _error;
 
   @override
   void initState() {
@@ -28,6 +29,12 @@ class _GroceryListState extends State<GroceryList> {
         'orderice-19a30-default-rtdb.asia-southeast1.firebasedatabase.app',
         'shopping_list.json');
     final response = await http.get(url);
+
+    if (response.statusCode >= 400) {
+      setState(() {
+        _error = "Failed to fetch data. Please try again later";
+      });
+    }
     final Map<String, dynamic> listData = json.decode(response.body);
 
     List<GroceryItem> loadedItems = [];
@@ -74,6 +81,11 @@ class _GroceryListState extends State<GroceryList> {
     if (_isloading) {
       content = const Center(
         child: CircularProgressIndicator(),
+      );
+    }
+    if (_error != null) {
+      content = Center(
+        child: Text(_error!),
       );
     }
     if (_groceryItems.isNotEmpty) {
