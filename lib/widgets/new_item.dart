@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_shopping_list/data/categories.dart';
 import 'package:flutter_shopping_list/models/category.dart';
+import 'package:flutter_shopping_list/models/grocery_item.dart';
 import 'package:http/http.dart' as http;
 
 class NewItem extends StatefulWidget {
@@ -18,32 +19,34 @@ class _NewItemState extends State<NewItem> {
   var _enteredQuantity = 1;
   var _selectedCategory = categories[Categories.vegetables]!;
 
-  void _saveItem() async{
+  void _saveItem() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       final url = Uri.https(
           'orderice-19a30-default-rtdb.asia-southeast1.firebasedatabase.app',
           'shopping_list.json');
-      final response = await http.post(url, headers: {
-        'Content-Type': 'application/json',
-      }, body: json.encode( {
-        'name': _enteredName,
-        'quantity': _enteredQuantity,
-        'category': _selectedCategory.type
-      }));
-print(response.body);
-print(response.statusCode);
+      final response = await http.post(url,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: json.encode({
+            'name': _enteredName,
+            'quantity': _enteredQuantity,
+            'category': _selectedCategory.type
+          }));
+      print(response.body);
+      print(response.statusCode);
 
-      if(!context.mounted){
+      final Map<String, dynamic> resData = json.decode(response.body);
+      if (!context.mounted) {
         return;
       }
 
-      Navigator.of(context).pop();
-      // Navigator.of(context).pop(GroceryItem(
-          // id: DateTime.now().toString(),
-          // name: _enteredName,
-          // quantity: _enteredQuantity,
-          // category: _selectedCategory));
+      Navigator.of(context).pop(GroceryItem(
+          id: resData['name'],
+          name: _enteredName,
+          quantity: _enteredQuantity,
+          category: _selectedCategory));
     }
   }
 
